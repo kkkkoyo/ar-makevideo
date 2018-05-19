@@ -23,11 +23,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
-        // Set the scene to the view
-        sceneView.scene = scene
     }
     //touches
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -43,15 +38,37 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     //createBall
     func createBall(_ position: SCNVector3){
         
-        let colors = [UIColor.darkGray , UIColor.blue, UIColor.red,UIColor.white,UIColor.cyan,UIColor.magenta]
+        let colors = [UIColor.white,UIColor.white,UIColor.white,UIColor.darkGray]
+        let size:CGFloat = 0.5
+        let size_z:CGFloat = 0.01
+
+        let pyramid = SCNPyramid(width: size, height: size, length: size_z)
+        let sphere = SCNSphere(radius: size)
+        let cube = SCNBox(width: size, height: size, length: size_z, chamferRadius: 0)
         
-        let sphere = SCNSphere(radius: 0.2)
-        sphere.firstMaterial?.diffuse.contents =
-        colors[Int(arc4random_uniform(5))]
-        let node = SCNNode(geometry: sphere)
-        node.position = position
+        let pattern = [sphere,sphere,sphere,pyramid,sphere,cube]
         
+        pattern[Int(arc4random_uniform(6))].firstMaterial?.diffuse.contents =
+        colors[Int(arc4random_uniform(4))]
+        let node = SCNNode(geometry: pattern[Int(arc4random_uniform(6))])
+
+        node.position = SCNVector3Make(position.x,position.y-0.1,position.z)
+        
+        print(node.position)
+        if let camera = sceneView.pointOfView {
+            //node.position = camera.convertPosition(position, to: nil)// カメラ位置からの偏差で求めた位置
+            print("2")
+            print(node.position)
+
+            //node.eulerAngles = camera.eulerAngles  // カメラのオイラー角と同じにする
+        }
         sceneView.scene.rootNode.addChildNode(node)
+        
+        SCNTransaction.animationDuration = 1.5
+        node.position.z = -3
+        node.opacity = 0
+        node.rotation = SCNVector4(0, 0, 1, 5)
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
