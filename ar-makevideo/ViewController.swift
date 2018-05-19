@@ -29,6 +29,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Set the scene to the view
         sceneView.scene = scene
     }
+    //touches
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else {return}
+        let result = sceneView.hitTest(touch.location(in: sceneView), types: ARHitTestResult.ResultType.featurePoint)
+        //guard
+        guard let pointResult = result.last else {return}
+        let pointTransform = SCNMatrix4(pointResult.worldTransform)
+        let pointVector =  SCNVector3Make(pointTransform.m41,
+                                          pointTransform.m42,pointTransform.m43)
+        createBall(pointVector)
+    }
+    //createBall
+    func createBall(_ position: SCNVector3){
+        
+        let colors = [UIColor.darkGray , UIColor.blue, UIColor.red,UIColor.white,UIColor.cyan,UIColor.magenta]
+        
+        let sphere = SCNSphere(radius: 0.2)
+        sphere.firstMaterial?.diffuse.contents =
+        colors[Int(arc4random_uniform(5))]
+        let node = SCNNode(geometry: sphere)
+        node.position = position
+        
+        sceneView.scene.rootNode.addChildNode(node)
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
