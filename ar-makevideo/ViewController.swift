@@ -52,8 +52,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         colors[Int(arc4random_uniform(4))]
         let node = SCNNode(geometry: pattern[Int(arc4random_uniform(6))])
 
-        node.position = SCNVector3Make(position.x,position.y-0.1,position.z)
-        
+        //node.position = SCNVector3Make(position.x,position.y-0.1,position.z)
+        node.position = position
         print(node.position)
         if let camera = sceneView.pointOfView {
             //node.position = camera.convertPosition(position, to: nil)// カメラ位置からの偏差で求めた位置
