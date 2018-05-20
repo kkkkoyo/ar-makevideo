@@ -35,13 +35,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                                           pointTransform.m42,pointTransform.m43)
         createBall(pointVector)
     }
+    
     var isWire = true
+    var isMany = false
 
     //createBall
     func createBall(_ position: SCNVector3){
+        isMany = randomBoolWithYesPercent(percent: 30)
 
         let colors = [UIColor.white]
-        let size:CGFloat = 0.5
+        let size_init = [0.5,0.5,0.5,0.1]
+        var size:CGFloat = CGFloat(size_init[Int(arc4random_uniform(UInt32(size_init.count)))])
+        if isMany{
+            size = 0.2
+        }
         let size_z:CGFloat = 0.01
 
         let pyramid = SCNPyramid(width: size, height: size, length: size_z)
@@ -52,32 +59,68 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         pattern[Int(arc4random_uniform(UInt32(pattern.count)))].firstMaterial?.diffuse.contents =
             colors[Int(arc4random_uniform(UInt32(colors.count)))]
-        let node = SCNNode(geometry: pattern[Int(arc4random_uniform(6))])
-
-        //node.position = SCNVector3Make(position.x,position.y-0.1,position.z)
-        node.position = position
+ 
         isWire = randomBoolWithYesPercent(percent: 50)
-        
-        if(isWire){
-            let node_opacity = [0.1 , 0.5, 1.0]
-            sceneView.debugOptions = [.showWireframe]
-            let num:Int = Int(arc4random_uniform(UInt32(node_opacity.count)))
-            node.opacity = CGFloat(node_opacity[num])
+        if !isMany{
+            let node = SCNNode(geometry: pattern[Int(arc4random_uniform(6))])
+            
+            //node.position = SCNVector3Make(position.x,position.y-0.1,position.z)
+            node.position = position
+            if(isWire){
+                let node_opacity = [0.1 , 0.5, 1.0]
+                sceneView.debugOptions = [.showWireframe]
+                let num:Int = Int(arc4random_uniform(UInt32(node_opacity.count)))
+                node.opacity = CGFloat(node_opacity[num])
+            }else{
+                sceneView.debugOptions = []
+            }
+            
+            print(node.position)
+            //if let camera = sceneView.pointOfView {
+    //            node.position = camera.convertPosition(position, to: nil)// カメラ位置からの偏差で求めた位置
+    //            node.eulerAngles = camera.eulerAngles  // カメラのオイラー角と同じにする
+            //}
+            sceneView.scene.rootNode.addChildNode(node)
+            
+            SCNTransaction.animationDuration = 1.5
+            node.position.z = -3
+            node.opacity = 0
+            node.rotation = SCNVector4(0, 0, 1, 5)
         }else{
-            sceneView.debugOptions = []
+            
+            let node_pattern = Int(arc4random_uniform(6))
+            let node_opacity = [0.1 , 0.5, 1.0]
+            let num:Int = Int(arc4random_uniform(UInt32(node_opacity.count)))
+            let size_pos = 0.5
+            let node_num = [1,3]
+            let select_num = node_num[Int(arc4random_uniform(UInt32(node_num.count)))]
+            var start_num = 0
+            var end_num = select_num
+            if select_num == 1 && randomBoolWithYesPercent(percent: 50){
+                start_num = 2
+                end_num = 3
+            }
+            for i in start_num...end_num {
+                print(i)
+                let pos_x = [0,0,-size_pos,size_pos]
+                let pos_y =  [size_pos,-size_pos,0,0]
+
+                let node = SCNNode(geometry: pattern[node_pattern])
+                node.position = SCNVector3Make(position.x+Float(pos_x[i]),position.y+Float(pos_y[i]),position.z)
+                if(isWire){
+                    sceneView.debugOptions = [.showWireframe]
+                    node.opacity = CGFloat(node_opacity[num])
+                }else{
+                    sceneView.debugOptions = []
+                }
+                sceneView.scene.rootNode.addChildNode(node)
+                SCNTransaction.animationDuration = 1.5
+                node.position.z = -3
+                node.opacity = 0
+                node.rotation = SCNVector4(0, 0, 1, 5)
+                
+            }
         }
-        
-        print(node.position)
-        if let camera = sceneView.pointOfView {
-            //node.position = camera.convertPosition(position, to: nil)// カメラ位置からの偏差で求めた位置
-            //node.eulerAngles = camera.eulerAngles  // カメラのオイラー角と同じにする
-        }
-        sceneView.scene.rootNode.addChildNode(node)
-        
-        SCNTransaction.animationDuration = 1.5
-        node.position.z = -3
-        node.opacity = 0
-        node.rotation = SCNVector4(0, 0, 1, 5)
     }
     func CreateSwitch(){
         // Swicthを作成する.
